@@ -113,34 +113,6 @@ class stream(nn.Module):
 
         return out
 
-        def attention_MSN(self, inverse, discrimnative):
-            GAP = nn.AdaptiveAvgPool2d((1, 1))
-            GMP = nn.AdaptiveMaxPool2d((1, 1))
-            sigmoid = nn.Sigmoid()
-
-            up_sample = nn.functional.interpolate(
-                inverse, (discrimnative.size()[2], discrimnative.size()[3]), mode='nearest')
-            conv = getattr(self, 'Conv_' + str(up_sample.size()[1]), 'None')
-            g = conv(up_sample)
-            g = sigmoid(g)
-            tmp = g * discrimnative + discrimnative
-
-            f_gap = GAP(tmp)
-            f_gap = f_gap.view(f_gap.size()[0], 1, f_gap.size()[1])
-            f_gmp = GMP(tmp)
-            f_gmp = f_gmp.view(f_gmp.size()[0], 1, f_gmp.size()[1])
-
-            fc = getattr(self, 'fc_' + str(f_gap.size(2)), 'None')
-            f_gap = fc(f_gap)
-            f_gmp = fc(f_gmp)
-
-            f = f_gap + f_gmp
-            f = sigmoid(f)
-            f = f.view(-1, f.size()[2], 1, 1)
-            out = tmp * f
-
-            return out
-
     def attention_MSN(self, inverse, discrimnative):
         GAP = nn.AdaptiveAvgPool2d((1, 1))
         GMP = nn.AdaptiveMaxPool2d((1, 1))
